@@ -21,15 +21,17 @@ What's Not Working<br>
 <br>
 If you are using an Orpheus pico you may hold down the auxilliary button (button on GPIO 25) to prevent script execution or stop a currently running script.<br>
 <br>
-**RGB Led Status Colors:**
-- Blue - no errors, running fine
-- Red - error occured while running script
-- Yellow - stopped script execution (from holding button during script execution)
-- Pink - skipped script execution (from holding the button while plugging in)
+You may also need to increase the delay on line 193 in keystrokes if the keyboard isn't being initialized in time.
+
+# RGB Led Status Colors
+
+- Blue — no errors, running fine
+- Red — error occured while running script
+- Yellow — stopped script execution (from holding button during script execution)
+- Pink — skipped script execution (from holding the button while plugging in)
 <br>
 The green status light will also be on during script executition. The pico will attempt to continue executing the script even if there is an error.
-<br>
-You may also need to increase the delay on line 193 in keystrokes if the keyboard isn't being initialized in time.
+
 
 # TODO
 1. Add support for non working parts of duckyscript
