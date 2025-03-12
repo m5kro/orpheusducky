@@ -9,10 +9,11 @@ import usb.device
 from usb.device.keyboard import KeyboardInterface, KeyCode
 import time
 import random
-from machine import Pin, soft_reset
+from machine import Pin, soft_reset, PWM
+import neopixel
 
 # Dummy keyboard class for testing purposes
-"""
+
 class DummyKeyboard:
     def __getattr__(self, name):
         # Return a dummy function that does nothing
@@ -23,13 +24,13 @@ class DummyKeyboard:
         return dummy_function
 
 keyboard = DummyKeyboard()
-"""
+
 
 # Actual keyboard class, comment out to debug using the dummy keyboard
 
 # Initialize the keyboard interface only when running as a script.
-keyboard = KeyboardInterface()
-usb.device.get().init(keyboard, builtin_driver=True)
+#keyboard = KeyboardInterface()
+#usb.device.get().init(keyboard, builtin_driver=True)
 
 
 # Various variables
@@ -53,6 +54,12 @@ keypress_delay = 0.0  # Delay in seconds between keypresses, supports decimal va
 
 # Define the button to stop
 button_left = Pin(25, Pin.IN, Pin.PULL_UP)
+
+# Set up the RGB LED on GPIO 24
+np = neopixel.NeoPixel(Pin(24), 1)
+
+# Green led on GPIO 23
+pwm_led = PWM(Pin(23))
 
 # Modifier keys dictionary
 MODIFIER_KEYS = {
@@ -136,6 +143,9 @@ def send_string(text):
     # Quit if left button held down
     if button_left.value() == 0:
         print("Stopping execution...")
+        pwm_led.duty_u16(0)
+        np[0] = (32, 32, 0)
+        np.write()
         soft_reset()
 
     # Send a string character by character
@@ -206,6 +216,11 @@ def handle_while_loop(condition, block):
     while eval(replacer(condition)):
         for line in block.split('\n'):
             interpret_line(line.lstrip())
+
+def show_error():
+    # Set the red channel to 25% brightness
+    np[0] = (64, 0, 0)
+    np.write()
 
 def interpret_line(line):
     global rem_block, string_block, stringln_block, constants, variables, num_whiles, reading_while, while_condition, while_block, jitter, max_jitter, keypress_delay, reading_function, current_function, functions
@@ -289,6 +304,7 @@ def interpret_line(line):
                 interpret_line(line.lstrip())
         else:
             print(f"Function '{command}' not found.")
+            show_error()
         return
     
     if command == 'RETURN':
@@ -305,6 +321,7 @@ def interpret_line(line):
             # Check that the first char is a pound sign
             if parts[1][0] != '#':
                 print(f"Invalid constant definition in line '{line.strip()}': Missing '#'")
+                show_error()
                 return
 
             # Check if it is String, int, or boolean
@@ -336,6 +353,7 @@ def interpret_line(line):
             # Check that the first char is a dollar sign
             if parts[1][0] != '$':
                 print(f"Invalid variable definition in line '{line.strip()}': Missing '$'")
+                show_error()
                 return
             # Check if it is String, int, or boolean
             if parts[3].isdigit():
@@ -425,6 +443,7 @@ def interpret_line(line):
                 held_keys.append(CHARACTER_TO_KEYCODE[key.lower()])
             else:
                 print(f"Key '{key}' not recognized or already held.")
+                show_error()
         keyboard.send_keys([])
         keyboard.send_keys(held_keys)
     elif command == 'RELEASE':
@@ -439,6 +458,7 @@ def interpret_line(line):
                 held_keys.remove(CHARACTER_TO_KEYCODE[key.lower()])
             else:
                 print(f"Key '{key}' not recognized or not held.")
+                show_error()
         keyboard.send_keys([])
         keyboard.send_keys(held_keys)
     elif command in SPECIAL_KEYS:
@@ -489,5 +509,8 @@ def interpret_line(line):
             keyboard.send_keys(held_keys) # Keep held keys held
         else:
             print(f"No key specified for modifiers in command '{line.strip()}'")
+            show_error()
     else:
-        print(f"Command '{command}' not recognized or not implemented.")
+        if command.lower() != 'end_while': # Ignore end_while commands
+            print(f"Command '{command}' not recognized or not implemented.")
+            show_error()
