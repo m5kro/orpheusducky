@@ -13,7 +13,7 @@ from machine import Pin, soft_reset, PWM
 import neopixel
 
 # Dummy keyboard class for testing purposes
-
+"""
 class DummyKeyboard:
     def __getattr__(self, name):
         # Return a dummy function that does nothing
@@ -24,13 +24,13 @@ class DummyKeyboard:
         return dummy_function
 
 keyboard = DummyKeyboard()
-
+"""
 
 # Actual keyboard class, comment out to debug using the dummy keyboard
 
 # Initialize the keyboard interface only when running as a script.
-#keyboard = KeyboardInterface()
-#usb.device.get().init(keyboard, builtin_driver=True)
+keyboard = KeyboardInterface()
+usb.device.get().init(keyboard, builtin_driver=True)
 
 
 # Various variables
