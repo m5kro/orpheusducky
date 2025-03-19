@@ -46,40 +46,50 @@ HOLD a
 STRING If you can read this it isn't working
 RELEASE a
 ENTER
-STRINGLN Testing loops
-REM Three Nested Loops
-VAR $i = 1
-WHILE ( $i <= 2 )
-    STRING Outer loop iteration: $i
-    ENTER
-    VAR $j = 1
-    WHILE ( $j <= 2 )
-        STRING   Middle loop iteration: $j
-        ENTER
-        VAR $k = 1
-        WHILE ( $k <= 2 )
-            STRING     Inner loop iteration: $k
+REM If else statements
+STRINGLN Testing IF ELSE statements
+IF ( $testvar == 123 ) THEN
+    STRINGLN Something went wrong
+ELSE IF ( $testvar == 120 ) THEN
+    STRINGLN First If Else statement working!
+    VAR $i = 1
+    IF ( $i == 1 ) THEN
+        STRINGLN Nested If statements working!
+        STRINGLN Testing loops
+        REM Three Nested Loops
+        WHILE ( $i <= 2 )
+            STRING Outer loop iteration: $i
             ENTER
-            $k = ( $k + 1 )
+            VAR $j = 1
+            WHILE ( $j <= 2 )
+                STRING   Middle loop iteration: $j
+                ENTER
+                VAR $k = 1
+                WHILE ( $k <= 2 )
+                    STRING     Inner loop iteration: $k
+                    ENTER
+                    $k = ( $k + 1 )
+                END_WHILE
+                $j = ( $j + 1 )
+            END_WHILE
+            $i = ( $i + 1 )
         END_WHILE
-        $j = ( $j + 1 )
-    END_WHILE
-    $i = ( $i + 1 )
-END_WHILE
-REM First Independent Loop
-VAR $a = 1
-WHILE ( $a <= 3 )
-    STRING Independent loop A, iteration: $a
-    ENTER
-    $a = ( $a + 1 )
-END_WHILE
-REM Second Independent Loop
-VAR $b = 1
-WHILE ( $b <= 3 )
-    STRING Independent loop B, iteration: $b
-    ENTER
-    $b = ( $b + 1 )
-END_WHILE
+        REM First Independent Loop
+        VAR $a = 1
+        WHILE ( $a <= 3 )
+            STRING Independent loop A, iteration: $a
+            ENTER
+            $a = ( $a + 1 )
+        END_WHILE
+        REM Second Independent Loop
+        VAR $b = 1
+        WHILE ( $b <= 3 )
+            STRING Independent loop B, iteration: $b
+            ENTER
+            $b = ( $b + 1 )
+        END_WHILE
+    END_IF
+END_IF
 GUI r
 DELAY 100
 STRING notepad

@@ -15,23 +15,24 @@ Turn your Orpheus pico into a rubber ducky! (or any regular pico too)
 You may use most of the available functions of [duckyscript 3.0](https://docs.hak5.org/hak5-usb-rubber-ducky/duckyscript-tm-quick-reference) in your script. <br>
 <br>
 What's Not Working<br>
-1. If-Else statements
-2. Random Values
-3. Mouse movements & clicks
+1. Random Values
+2. Mouse movements & clicks
+3. WAIT_FOR (probably not gonna work)
+4. SAVE and RESTORE (need a way to get the state)
+5. Exfiltration (never gonna work)
+
 <br>
 If you are using an Orpheus pico you may hold down the auxilliary button (button on GPIO 25) to prevent script execution or stop a currently running script.<br>
 <br>
-You may also need to increase the delay on line 193 in keystrokes if the keyboard isn't being initialized in time.
-
-# RGB Led Status Colors
-
-- Blue — no errors, running fine
-- Red — error occured while running script
-- Yellow — stopped script execution (from holding button during script execution)
-- Pink — skipped script execution (from holding the button while plugging in)
+**RGB Led Status Colors:**
+- Blue - no errors, running fine
+- Red - error occured while running script
+- Yellow - stopped script execution (from holding button during script execution)
+- Pink - skipped script execution (from holding the button while plugging in)
 <br>
 The green status light will also be on during script executition. The pico will attempt to continue executing the script even if there is an error.
-
+<br>
+You may also need to increase the delay on line 193 in keystrokes if the keyboard isn't being initialized in time.
 
 # TODO
 1. Add support for non working parts of duckyscript
