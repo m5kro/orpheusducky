@@ -3,7 +3,6 @@
 # The code is quacking at me ... Please send help ╥﹏╥
 
 # TODO:
-# - Add support for random values
 # - Add support for mouse movements and clicks
 # - Add support for WAIT_FOR command (maybe)
 # - Figure out a way to get the capslock, numlock, and fnlock status
@@ -57,6 +56,8 @@ while_condition = ""  # String to store the while condition
 while_block = ""  # String to store the while block
 jitter = False  # Flag to indicate if we should add jitter
 max_jitter = 20  # Maximum jitter in milliseconds to add to the keypress delay
+random_min = 0  # Minimum random value for number generation
+random_max = 65535  # Maximum random value for number generation
 
 keypress_delay = 0.0  # Delay in seconds between keypresses, supports decimal values
 
@@ -189,8 +190,50 @@ def send_string(text):
             print(f"Character '{char}' not found in keycode mapping.")
 
 def replacer(input):
-    global constants, variables
+    global constants, variables, random_min, random_max
     # Replace constants and variables in the input
+    if "$_RANDOM_INT" in input:
+        count = input.count("$_RANDOM_INT")
+        for _ in range(count):
+            # Replace each $_RANDOM_INT with a random integer between random_min and random_max
+            random_value = random.randint(random_min, random_max)
+            input = input.replace("$_RANDOM_INT", str(random_value), 1)
+    if "$_RANDOM_LOWER_LETTER_KEYCODE" in input:
+        # Replace each $_RANDOM_LOWER_LETTER_KEYCODE with a random lowercase letter
+        random_letter = random.choice("abcdefghijklmnopqrstuvwxyz")
+        input = input.replace("$_RANDOM_LOWER_LETTER_KEYCODE", str(random_letter), 1)
+    if "$_RANDOM_UPPER_LETTER_KEYCODE" in input:
+        count = input.count("$_RANDOM_UPPER_LETTER_KEYCODE")
+        for _ in range(count):
+            # Replace each $_RANDOM_UPPER_LETTER_KEYCODE with a random uppercase letter
+            random_letter = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            input = input.replace("$_RANDOM_UPPER_LETTER_KEYCODE", str(random_letter), 1)
+    if "$_RANDOM_LETTER_KEYCODE" in input:
+        count = input.count("$_RANDOM_LETTER_KEYCODE")
+        for _ in range(count):
+            # Replace each $_RANDOM_LETTER_KEYCODE with a random letter (lowercase or uppercase)
+            random_letter = random.choice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            input = input.replace("$_RANDOM_LETTER_KEYCODE", str(random_letter), 1)
+    if "$_RANDOM_NUMBER_KEYCODE" in input:
+        count = input.count("$_RANDOM_NUMBER_KEYCODE")
+        for _ in range(count):
+            # Replace each $_RANDOM_NUMBER_KEYCODE with a random number
+            random_number = random.choice("0123456789")
+            input = input.replace("$_RANDOM_NUMBER_KEYCODE", str(random_number), 1)
+    if "$_RANDOM_SPECIAL_KEYCODE" in input:
+        count = input.count("$_RANDOM_SPECIAL_KEYCODE")
+        for _ in range(count):
+            # Replace each $_RANDOM_SPECIAL_KEYCODE with a random special character
+            special_chars = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/"
+            random_char = random.choice(special_chars)
+            input = input.replace("$_RANDOM_SPECIAL_KEYCODE", str(random_char), 1)
+    if "$_RANDOM_CHAR_KEYCODE" in input:
+        count = input.count("$_RANDOM_CHAR_KEYCODE")
+        for _ in range(count):
+            # Replace each $_RANDOM_CHAR_KEYCODE with a random character (letter, number, or special)
+            all_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:'\",.<>?/"
+            random_char = random.choice(all_chars)
+            input = input.replace("$_RANDOM_CHAR_KEYCODE", str(random_char), 1)
     for key in sorted(constants.keys(), key=len, reverse=True):
         input = input.replace(key, str(constants[key]))
     for key in sorted(variables.keys(), key=len, reverse=True):
@@ -208,7 +251,7 @@ def replacer(input):
 
 def interpret_ducky_script(filename):
     # Wait for the keyboard to be ready
-    time.sleep(0.5)
+    time.sleep(1)
     # Interpret a DuckyScript file and execute commands
     with open(filename, 'r') as file:
         lines = file.readlines()
@@ -243,7 +286,7 @@ def show_error():
     np.write()
 
 def interpret_line(line):
-    global rem_block, string_block, stringln_block, constants, variables, num_whiles, num_if_else, reading_while, if_else_conditions, if_else_blocks, current_if_else, reading_if_else, while_condition, while_block, jitter, max_jitter, keypress_delay, reading_function, current_function, functions
+    global rem_block, string_block, stringln_block, constants, variables, num_whiles, num_if_else, reading_while, if_else_conditions, if_else_blocks, current_if_else, reading_if_else, while_condition, while_block, jitter, max_jitter, keypress_delay, reading_function, current_function, functions, random_min, random_max
     # Split the line into parts
     print(line)
     parts = line.strip().split()
@@ -466,6 +509,14 @@ def interpret_line(line):
             max_jitter = int(parts[2])
             return
         
+        if command =="$_RANDOM_MIN":
+            random_min = int(parts[2])
+            return
+        
+        if command == "$_RANDOM_MAX":
+            random_max = int(parts[2])
+            return
+        
         if len(parts) > 2:
 
             # Check if it is String, int, or boolean
@@ -507,6 +558,32 @@ def interpret_line(line):
             send_string(newline.lstrip().rstrip('\n')[9:] + '\n')
         else:
             stringln_block = True
+    elif command == 'RANDOM_LOWERCASE_LETTER':
+        # Send a random lowercase letter
+        letter = random.choice("abcdefghijklmnopqrstuvwxyz")
+        send_string(letter)
+    elif command == 'RANDOM_UPPERCASE_LETTER':
+        # Send a random uppercase letter
+        letter = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        send_string(letter)
+    elif command == 'RANDOM_LETTER':
+        # Send a random letter (lowercase or uppercase)
+        letter = random.choice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        send_string(letter)
+    elif command == 'RANDOM_NUMBER':
+        # Send a random number between 0 and 9
+        number = random.choice("0123456789")
+        send_string(number)
+    elif command == 'RANDOM_SPECIAL':
+        # Send a random special character
+        special_chars = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/"
+        char = random.choice(special_chars)
+        send_string(char)
+    elif command == 'RANDOM_CHAR':
+        # Send a random character (letter, number, or special)
+        all_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:'\",.<>?/"
+        char = random.choice(all_chars)
+        send_string(char)
     elif command == 'STOP_PAYLOAD':
         print("Stop order received.")
         exit()
