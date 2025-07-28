@@ -9,6 +9,7 @@
 
 import usb.device
 from usb.device.keyboard import KeyboardInterface, KeyCode
+from usb.device.mouse import MouseInterface
 import time
 import random
 from machine import Pin, soft_reset, PWM
@@ -32,13 +33,14 @@ keyboard = DummyKeyboard()
 
 # Initialize the keyboard interface only when running as a script.
 keyboard = KeyboardInterface()
+mouse = MouseInterface()
 usb.device.get().init(keyboard, builtin_driver=True)
-
 
 # Various variables
 rem_block = False  # Flag to ignore REM_BLOCK sections
 string_block = False  # Flag for STRING BLOCK sections
 stringln_block = False  # Flag for STRINGLN BLOCK sections
+mouse_block = False  # Flag for MOUSE BLOCK sections
 constants = {}  # Dictionary to store constants
 variables = {}  # Dictionary to store variables
 functions = {}  # Dictionary to store functions
@@ -145,6 +147,24 @@ SHIFT_REQUIRED_CHARACTERS = {
     ':': KeyCode.SEMICOLON, '"': KeyCode.QUOTE, '<': KeyCode.COMMA, '>': KeyCode.DOT,
     '?': KeyCode.SLASH
 }
+
+def enable_mouse():
+    # Enable the mouse interface
+    try:
+        usb.device.get().init(mouse, builtin_driver=True)
+        time.sleep(1)  # Give some time for the mouse to initialize
+        print("Mouse interface enabled.")
+    except Exception as e:
+        print(f"Failed to enable mouse interface: {e}")
+
+def disable_mouse():
+    # Disable the mouse interface by reinitializing the keyboard
+    try:
+        usb.device.get().init(keyboard, builtin_driver=True)
+        time.sleep(1)  # Give some time for the keyboard to reinitialize
+        print("Mouse interface disabled, keyboard reinitialized.")
+    except Exception as e:
+        print(f"Failed to disable mouse interface: {e}")
 
 def send_string(text):
     global jitter, max_jitter, keypress_delay
@@ -286,7 +306,7 @@ def show_error():
     np.write()
 
 def interpret_line(line):
-    global rem_block, string_block, stringln_block, constants, variables, num_whiles, num_if_else, reading_while, if_else_conditions, if_else_blocks, current_if_else, reading_if_else, while_condition, while_block, jitter, max_jitter, keypress_delay, reading_function, current_function, functions, random_min, random_max
+    global rem_block, string_block, stringln_block, mouse_block, constants, variables, num_whiles, num_if_else, reading_while, if_else_conditions, if_else_blocks, current_if_else, reading_if_else, while_condition, while_block, jitter, max_jitter, keypress_delay, reading_function, current_function, functions, random_min, random_max
     # Split the line into parts
     print(line)
     parts = line.strip().split()
@@ -621,6 +641,70 @@ def interpret_line(line):
                 show_error()
         keyboard.send_keys([])
         keyboard.send_keys(held_keys)
+    elif command == 'MOUSE':
+        enable_mouse()
+        mouse_block = True
+    elif command == 'END_MOUSE':
+        disable_mouse()
+        mouse_block = False
+    elif command == 'MOUSE_MOVE':
+        # Move the mouse by a specified amount
+        if len(parts) > 2:
+            try:
+                x = int(parts[1])
+                y = int(parts[2])
+                if not mouse_block:
+                    enable_mouse()
+                # mouse can only move max 127 pixels at a time, send multiple commands if needed
+                while abs(x) > 127 or abs(y) > 127:
+                    mouse.move_by(127 if x > 0 else -127, 127 if y > 0 else -127)
+                    x -= 127 if x > 0 else -127
+                    y -= 127 if y > 0 else -127
+                mouse.move_by(x, y)
+            except ValueError:
+                print(f"Invalid mouse move parameters in line '{line.strip()}': {parts[1]}, {parts[2]}")
+                show_error()
+        else:
+            print(f"Insufficient parameters for MOUSE_MOVE in line '{line.strip()}'")
+            show_error()
+        if not mouse_block:
+            disable_mouse()
+    elif command == 'MOUSE_RIGHT_CLICK':
+        try:
+            if not mouse_block:
+                enable_mouse()
+            mouse.click_right(True)
+            time.sleep(0.1)  # Short delay to simulate right click
+            mouse.click_right(False)
+        except Exception as e:
+            print(f"Failed to perform right click: {e}")
+            show_error()
+        if not mouse_block:
+            disable_mouse()
+    elif command == 'MOUSE_LEFT_CLICK':
+        try:
+            if not mouse_block:
+                enable_mouse()
+            mouse.click_left(True)
+            time.sleep(0.1)  # Short delay to simulate left click
+            mouse.click_left(False)
+        except Exception as e:
+            print(f"Failed to perform left click: {e}")
+            show_error()
+        if not mouse_block:
+            disable_mouse()
+    elif command == 'MOUSE_MIDDLE_CLICK':
+        try:
+            if not mouse_block:
+                enable_mouse()
+            mouse.click_middle(True)
+            time.sleep(0.1)  # Short delay to simulate middle click
+            mouse.click_middle(False)
+        except Exception as e:
+            print(f"Failed to perform middle click: {e}")
+            show_error()
+        if not mouse_block:
+            disable_mouse()
     elif command in SPECIAL_KEYS:
         # Handle special keys
         keyboard.send_keys([SPECIAL_KEYS[command]])
