@@ -16,7 +16,7 @@ You may use most of the available functions of [duckyscript 3.0](https://docs.ha
 
 ## Mouse
 Since Duckyscript 3.0 does not have any mouse commands, I have created some.<br>
-**Warning:** Mouse support is still very buggy, there is also a delay when initializing the mouse, so it is recommened to use the mouse block for multiple continuous actions.
+**Warning:** Mouse support is still very buggy, there is also a delay when initializing the mouse, so it is recommended to use the mouse block for multiple continuous actions.
 | Command | Usage |
 | ------- | ----- |
 | `MOUSE` | Start of a mouse block |
@@ -40,12 +40,14 @@ If you are using an Orpheus pico you may hold down the auxilliary button (button
 You may also need to increase the delay on line 193 in keystrokes if the keyboard isn't being initialized in time.
 
 # RGB Led Status Colors
- 
-- Blue — no errors, running fine
-- Red — error occured while running script
-- Yellow — stopped script execution (from holding button during script execution)
-- Pink — skipped script execution (from holding the button while plugging in)
-<br>
+
+| Color | Status |
+| ----- | ------ |
+| 🟦 Blue | no errors, running fine |
+| 🟥 Red | error occured while running script |
+| 🟨 Yellow | stopped script execution (from holding button during script execution) |
+| 🟪 Pink | skipped script execution (from holding the button while plugging in) |
+
 The green status light will also be on during script executition. The pico will attempt to continue executing the script even if there is an error.
 
 # TODO
