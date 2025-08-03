@@ -3,7 +3,6 @@
 # The code is quacking at me ... Please send help ╥﹏╥
 
 # TODO:
-# - Add support for mouse movements and clicks
 # - Add support for WAIT_FOR command (maybe)
 # - Figure out a way to get the capslock, numlock, and fnlock status
 
